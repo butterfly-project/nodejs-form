@@ -12,6 +12,11 @@ assert.promiseEqual = (promise, expected) => {
         .then(result => assert.equal(expected, result))
         .catch(() => assert.ok(false));
 };
+assert.promiseEqualDeep = (promise, expected) => {
+    promise
+        .then(result => assert.deepEqual(expected, result))
+        .catch(() => assert.ok(false));
+};
 assert.promiseOk = promise => {
     promise
         .then(() => assert.ok(true))

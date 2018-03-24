@@ -21,7 +21,7 @@ const compare = (operator, expected, real) => {
     }
 };
 
-module.exports = (expected, operator) => value => {
+module.exports = (expected, operator = module.exports.EQUAL) => value => {
     return new Promise(resolve => {
         if (!_.isString(value)) {
             throw Error('Expected string, given ' + _.toString(value));
