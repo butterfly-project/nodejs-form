@@ -4,7 +4,7 @@ const _ = require('lodash');
 
 const filterTransformer = transformer => ({constraint, valueObj}) => {
     return new Promise(resolve => {
-        transformer(_.cloneDeep(valueObj.value)).then(transformedValue => {
+        transformer(_.cloneDeep(valueObj.value), constraint).then(transformedValue => {
             valueObj.value = transformedValue;
             resolve({constraint, valueObj});
         });
@@ -13,7 +13,7 @@ const filterTransformer = transformer => ({constraint, valueObj}) => {
 
 const filterValidator = (validator, message, isFatal) => ({constraint, valueObj}) => {
     return new Promise((resolve, reject) => {
-        validator(valueObj.value).then(isCorrect => {
+        validator(valueObj.value, constraint).then(isCorrect => {
             if (isCorrect) {
                 resolve({constraint, valueObj});
             } else if (!isFatal) {
