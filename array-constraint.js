@@ -114,6 +114,7 @@ class ArrayConstraint {
     constructor() {
         this.constraints = {};
         this.parent = null;
+        this.tempResult = {};
     }
 
     setParent(parent) {
@@ -162,21 +163,29 @@ class ArrayConstraint {
             throw Error('Expected object, given ' + toType(value));
         }
 
-        const map = {};
-        const promises = _.map(_.keys(this.constraints), (key, index) => {
-            map[index] = key;
-            return this.constraints[key].filter(value[key]);
-        });
-
         return new Promise(resolve => {
-            Promise.all(promises).then(rawKeyResults => {
-                const keyResults = {};
-                _.map(rawKeyResults, (result, index) => {
-                    keyResults[map[index]] = result;
+            const keys = _.keys(this.constraints);
+
+            if (keys.length > 0) {
+                let currentKey = keys.shift();
+                let promise = this.constraints[currentKey].filter(value[currentKey]);
+                _.map(keys, key => {
+                    promise = promise.then(constraintResult => {
+                        this.tempResult[currentKey] = constraintResult;
+
+                        currentKey = key;
+
+                        return this.constraints[currentKey].filter(value[currentKey]);
+                    });
                 });
 
-                resolve(new FilterResult(keyResults));
-            });
+                promise.then(constraintResult => {
+                    this.tempResult[currentKey] = constraintResult;
+
+                    resolve(new FilterResult(_.cloneDeep(this.tempResult)));
+                    this.tempResult = {};
+                });
+            }
         });
     }
 }

@@ -42,4 +42,64 @@ defineTest(({describe, it, assert}) => {
 
     });
 
+    describe("arrayConstraint 2", () => {
+        const findUserByUsername = username => {
+            return new Promise(resolve => {
+                if (username.length === 4) {
+                    resolve({id: 1, username, password: 'abc'});
+                } else {
+                    resolve(null);
+                }
+            });
+        };
+
+        const checkPassword = (password, passwordConstraint) => {
+            return new Promise(resolve => {
+                const userResult = passwordConstraint.getParent().tempResult.user;
+
+                if (!userResult.isValid) {
+                    resolve(false);
+                    return;
+                }
+
+                const user = userResult.value;
+                const isCorrect = user.password === password;
+
+                resolve(isCorrect);
+            })
+        };
+
+        const realForm = arrayConstraint()
+            .addScalarConstraint('user')
+                .addTransformer(t.trim())
+                .addTransformer(findUserByUsername)
+                .addValidator(v.isNotEmpty(), 'Undefined user')
+            .end()
+            .addScalarConstraint('password')
+                .addTransformer(t.trim())
+                .addValidator(checkPassword, 'Incorrect password')
+            .end()
+        ;
+
+        it("realform", () => {
+            return realForm.filter({user: 'user', password: 'abc'})
+                .then(result => {
+                    assert.equal(result.isValid, true);
+                });
+        });
+
+        it("realform undefined user", () => {
+            return realForm.filter({user: 'u', password: 'abc'})
+                .then(result => {
+                    assert.equal(result.firstErrorMessage, 'Undefined user');
+                });
+        });
+
+        it("realform incorrect password", () => {
+            return realForm.filter({user: 'user', password: 'abc1'})
+                .then(result => {
+                    assert.equal(result.firstErrorMessage, 'Incorrect password');
+                });
+        });
+    });
 });
