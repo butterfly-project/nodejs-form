@@ -131,11 +131,16 @@ class ScalarConstraint {
             };
 
             const filters = _.cloneDeep(this.filters);
-            const promise = _.reduce(filters, (promise, filter) => promise.then(filter), filters.shift()({constraint: this, valueObj}));
-            promise
-                .then(({valueObj}) => resolve(createResponse(valueObj)))
-                .catch(({valueObj}) => resolve(createResponse(valueObj)))
-            ;
+
+            if (filters.length > 0) {
+                const promise = _.reduce(filters, (promise, filter) => promise.then(filter), filters.shift()({constraint: this, valueObj}));
+                promise
+                    .then(({valueObj}) => resolve(createResponse(valueObj)))
+                    .catch(({valueObj}) => resolve(createResponse(valueObj)))
+                ;
+            } else {
+                resolve(createResponse(valueObj));
+            }
         });
     }
 }
