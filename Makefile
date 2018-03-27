@@ -9,4 +9,4 @@ deploy:
 	npm publish
 
 run-test:
-	docker run --rm -v ${DIR}:/usr/src/app agregad/node babel-node ./node_modules/mocha/bin/_mocha test/
+	docker run --rm -v ${DIR}:/usr/local/app agregad/node babel-node ./node_modules/mocha/bin/_mocha test/
