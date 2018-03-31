@@ -7,6 +7,7 @@ const stringLength = require('./src/validation/string-length');
 const compare = require('./src/validation/compare');
 const composite = require('./src/validation/composite');
 const email = require('./src/validation/email');
+const url = require('./src/validation/url');
 const isEmpty = require('./src/validation/is-empty');
 const isNotEmpty = require('./src/validation/is-not-empty');
 const isNull = require('./src/validation/is-null');
@@ -26,6 +27,7 @@ module.exports = {
     compare,
     composite,
     email,
+    url,
     isEmpty,
     isNotEmpty,
     isNull,
