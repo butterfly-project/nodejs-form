@@ -16,10 +16,10 @@ defineTest(({describe, it, assert}) => {
 
     describe("arrayContains", () => {
         it("ok", () => {
-            assert.promiseEqual(v.arrayContain('a')(['a']), true);
+            assert.promiseEqual(v.arrayContain(['a'])('a'), true);
         });
         it("fail", () => {
-            assert.promiseEqual(v.arrayContain('b')(['a']), false);
+            assert.promiseEqual(v.arrayContain(['a'])('b'), false);
         });
     });
 
