@@ -183,6 +183,8 @@ defineTest(({describe, it, assert}) => {
             assert.promiseEqual(v.url()('https://mailforspam.com'), true);
             assert.promiseEqual(v.url()('abcmailforspam.com'), false);
             assert.promiseEqual(v.url(true)('abcmailforspam.com'), true);
+            assert.promiseEqual(v.url()('http://vk.com'), true);
+            assert.promiseEqual(v.url()('http://v.com'), false);
         });
     });
 
