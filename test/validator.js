@@ -177,6 +177,15 @@ defineTest(({describe, it, assert}) => {
         });
     });
 
+    describe("url", () => {
+        it("check", () => {
+            assert.promiseEqual(v.url()('http://abc.mailforspam.com'), true);
+            assert.promiseEqual(v.url()('https://mailforspam.com'), true);
+            assert.promiseEqual(v.url()('abcmailforspam.com'), false);
+            assert.promiseEqual(v.url(true)('abcmailforspam.com'), true);
+        });
+    });
+
     describe("isEmpty", () => {
         it("check", () => {
             assert.promiseEqual(v.isEmpty()(), true);
