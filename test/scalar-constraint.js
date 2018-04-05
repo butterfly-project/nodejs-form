@@ -78,6 +78,20 @@ defineTest(({describe, it, assert}) => {
                     assert.equal(firstErrorMessage, null);
                 });
         });
+        it("valueIf", () => {
+            const form = scalarConstraint()
+                .valueIf(v.compare(0), 100)
+                .addValidator(v.compare(100), 'Value is incorrect')
+            ;
+
+            return form.filter(0)
+                .then(({isValid, value, errorMessages, firstErrorMessage}) => {
+                    assert.equal(isValid, true);
+                    assert.equal(value, 100);
+                    assert.equal(errorMessages.length, 0);
+                    assert.equal(firstErrorMessage, null);
+                });
+        });
     });
 
 });
