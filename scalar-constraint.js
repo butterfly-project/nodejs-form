@@ -41,6 +41,20 @@ const filterBreakIf = (validator, source) => ({constraint, valueObj}) => {
     });
 };
 
+const filterValueIf = (validator, value, source) => ({constraint, valueObj}) => {
+    return new Promise(resolve => {
+        const checkedValue = source === module.exports.SOURCE_CONSTRAINT ? constraint : valueObj.value;
+
+        validator(checkedValue).then(isSuccess => {
+            if (isSuccess) {
+                valueObj.value = value;
+            }
+
+            resolve({constraint, valueObj});
+        });
+    });
+};
+
 const filterSaveValue = label => ({constraint, valueObj}) => {
     return new Promise(resolve => {
         valueObj.values[label] = _.cloneDeep(valueObj.value);
@@ -91,6 +105,12 @@ class ScalarConstraint {
 
     breakIf(validator, source = module.exports.SOURCE_VALUE) {
         this.filters.push(filterBreakIf(validator, source));
+
+        return this;
+    }
+
+    valueIf(validator, value, source = module.exports.SOURCE_VALUE) {
+        this.filters.push(filterValueIf(validator, value, source));
 
         return this;
     }
