@@ -10,14 +10,12 @@ const toType = require('./src/transformer/to-type');
 const trim = require('./src/transformer/trim');
 const composite = require('./src/transformer/composite');
 
-module.exports = {
-    jsonDecode,
-    jsonEncode,
-    letterCase,
-    mapper,
-    stringReplace,
-    stringLimit,
-    toType,
-    trim,
-    composite,
-};
+module.exports.jsonDecode = jsonDecode;
+module.exports.jsonEncode = jsonEncode;
+module.exports.letterCase = letterCase;
+module.exports.mapper = mapper;
+module.exports.stringReplace = stringReplace;
+module.exports.stringLimit = stringLimit;
+module.exports.toType = toType;
+module.exports.trim = trim;
+module.exports.composite = composite;
