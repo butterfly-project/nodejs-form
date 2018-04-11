@@ -19,23 +19,21 @@ const isTrue = require('./src/validation/is-true');
 const isType = require('./src/validation/is-type');
 const regexp = require('./src/validation/regexp');
 
-module.exports = {
-    objectHasKey,
-    arrayContain,
-    arrayLength,
-    stringLength,
-    compare,
-    composite,
-    email,
-    url,
-    isEmpty,
-    isNotEmpty,
-    isNull,
-    isNotNull,
-    isUndefined,
-    isNotUndefined,
-    isFalse,
-    isTrue,
-    isType,
-    regexp,
-};
+module.exports.objectHasKey = objectHasKey;
+module.exports.arrayContain = arrayContain;
+module.exports.arrayLength = arrayLength;
+module.exports.stringLength = stringLength;
+module.exports.compare = compare;
+module.exports.composite = composite;
+module.exports.email = email;
+module.exports.url = url;
+module.exports.isEmpty = isEmpty;
+module.exports.isNotEmpty = isNotEmpty;
+module.exports.isNull = isNull;
+module.exports.isNotNull = isNotNull;
+module.exports.isUndefined = isUndefined;
+module.exports.isNotUndefined = isNotUndefined;
+module.exports.isFalse = isFalse;
+module.exports.isTrue = isTrue;
+module.exports.isType = isType;
+module.exports.regexp = regexp;
