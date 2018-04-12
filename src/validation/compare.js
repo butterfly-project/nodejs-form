@@ -26,7 +26,9 @@ const compare = function (operator, expected, value) {
     }
 };
 
-module.exports = function (expected, operator = module.exports.IDENTICALLY) {
+module.exports = function (expected, operator) {
+    operator = operator || module.exports.IDENTICALLY;
+
     return function (value) {
         return new Promise(function (resolve) {
             resolve(compare(operator, expected, value));

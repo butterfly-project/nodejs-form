@@ -22,7 +22,9 @@ const compositeResults = function (results, type) {
     return _.reduce(results, compositeResult(type), firstResult);
 };
 
-module.exports = function (validators, type = module.exports.AND) {
+module.exports = function (validators, type) {
+    type = type || module.exports.AND;
+
     return function (value) {
         return new Promise(function (resolve) {
             if (validators.length === 0) {
