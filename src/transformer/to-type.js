@@ -1,8 +1,8 @@
 'use strict';
 
-const _ = require('lodash');
+var _ = require('lodash');
 
-const typeFilters = {
+var typeFilters = {
     'boolean': function (value) {
         return !!value;
     },
@@ -14,7 +14,7 @@ const typeFilters = {
     },
 };
 
-const filter = function (type, value) {
+var filter = function (type, value) {
     return typeFilters[type](value);
 };
 

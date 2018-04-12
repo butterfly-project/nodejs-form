@@ -1,9 +1,9 @@
 'use strict';
 
-const _ = require('lodash');
-const scalarConstraint = require('./scalar-constraint');
+var _ = require('lodash');
+var scalarConstraint = require('./scalar-constraint');
 
-const filterTransformer = function (transformer) {
+var filterTransformer = function (transformer) {
     return function ({constraint, valueObj}) {
         return new Promise(function (resolve) {
             transformer(_.cloneDeep(valueObj.value)).then(function (transformedValue) {
@@ -14,7 +14,7 @@ const filterTransformer = function (transformer) {
     }
 };
 
-const filterValidator = function (validator, message, isFatal) {
+var filterValidator = function (validator, message, isFatal) {
     return function ({constraint, valueObj}) {
         return new Promise(function (resolve, reject) {
             validator(valueObj.value).then(function (isCorrect) {
@@ -32,10 +32,10 @@ const filterValidator = function (validator, message, isFatal) {
     }
 };
 
-const filterBreakIf = function (validator, source) {
+var filterBreakIf = function (validator, source) {
     return function ({constraint, valueObj}) {
         return new Promise(function (resolve, reject) {
-            const checkedValue = source === module.exports.SOURCE_CONSTRAINT ? constraint : valueObj.value;
+            var checkedValue = source === module.exports.SOURCE_CONSTRAINT ? constraint : valueObj.value;
 
             validator(checkedValue).then(function (isBreak) {
                 if (isBreak) {
@@ -48,7 +48,7 @@ const filterBreakIf = function (validator, source) {
     }
 };
 
-const filterSaveValue = function (label) {
+var filterSaveValue = function (label) {
     return function ({constraint, valueObj}) {
         return new Promise(function (resolve) {
             valueObj.values[label] = _.cloneDeep(valueObj.value);
@@ -58,7 +58,7 @@ const filterSaveValue = function (label) {
     }
 };
 
-const filterRestoreValue = function (label) {
+var filterRestoreValue = function (label) {
     return function ({constraint, valueObj}) {
         return new Promise(function (resolve) {
             valueObj.value = _.cloneDeep(valueObj.values[label]);
@@ -71,7 +71,7 @@ const filterRestoreValue = function (label) {
 class FilterResult {
     constructor(keyResults) {
         this.keys = _.keys(keyResults);
-        const self = this;
+        var self = this;
 
         _.map(this.keys, function (key) {
             self[key] = keyResults[key];
@@ -79,8 +79,8 @@ class FilterResult {
     }
 
     getValue(label = 'after') {
-        const result = {};
-        const self = this;
+        var result = {};
+        var self = this;
 
         _.map(this.keys, function (key) {
             result[key] = self[key].values[label];
@@ -90,7 +90,7 @@ class FilterResult {
     }
 
     get isValid() {
-        const self = this;
+        var self = this;
         return _.reduce(_.map(this.keys, function (key) {
             return self[key].isValid;
         }), function (sum, isValid) {
@@ -99,7 +99,7 @@ class FilterResult {
     }
 
     get errorMessages() {
-        const self = this;
+        var self = this;
         return _.reduce(_.map(this.keys, function (key) {
             return self[key].errorMessages;
         }), function (sum, messages) {
@@ -108,8 +108,8 @@ class FilterResult {
     }
 
     get structuredErrorMessages() {
-        const self = this;
-        const result = {};
+        var self = this;
+        var result = {};
 
         _.map(this.keys, function (key) {
             result[key] = self[key].structuredErrorMessages;
@@ -119,8 +119,8 @@ class FilterResult {
     }
 
     get firstErrorMessage() {
-        let errorMessage = '';
-        const self = this;
+        var errorMessage = '';
+        var self = this;
 
         _.forEach(this.keys, function (key) {
             if (self[key].errorMessages.length > 0) {
@@ -182,20 +182,20 @@ class ArrayConstraint {
     }
 
     filter(value) {
-        const self = this;
+        var self = this;
         if (!_.isObject(value)) {
-            const toType = function (obj) {
+            var toType = function (obj) {
                 return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
             };
             throw Error('Expected object, given ' + toType(value));
         }
 
         return new Promise(function(resolve) {
-            const keys = _.keys(self.constraints);
+            var keys = _.keys(self.constraints);
 
             if (keys.length > 0) {
-                let currentKey = keys.shift();
-                let promise = self.constraints[currentKey].filter(value[currentKey]);
+                var currentKey = keys.shift();
+                var promise = self.constraints[currentKey].filter(value[currentKey]);
                 _.map(keys, function(key) {
                     promise = promise.then(function(constraintResult) {
                         self.tempResult[currentKey] = constraintResult;

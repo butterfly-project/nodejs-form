@@ -1,6 +1,6 @@
 'use strict';
 
-const filter = function (value) {
+var filter = function (value) {
     return value.trim();
 };
 

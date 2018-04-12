@@ -1,8 +1,8 @@
 'use strict';
 
-const _ = require('lodash');
+var _ = require('lodash');
 
-const compositeResult = function (type) {
+var compositeResult = function (type) {
     return function (a, b) {
         switch (type) {
             case module.exports.AND:
@@ -16,8 +16,8 @@ const compositeResult = function (type) {
         }
     }
 };
-const compositeResults = function (results, type) {
-    const firstResult = results.shift();
+var compositeResults = function (results, type) {
+    var firstResult = results.shift();
 
     return _.reduce(results, compositeResult(type), firstResult);
 };
@@ -32,7 +32,7 @@ module.exports = function (validators, type) {
                 return;
             }
 
-            const promises = _.map(validators, function (validator) {
+            var promises = _.map(validators, function (validator) {
                 return validator(value)
             });
 

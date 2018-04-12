@@ -1,8 +1,8 @@
 'use strict';
 
-const _ = require('lodash');
+var _ = require('lodash');
 
-const filterModeFunctions = {
+var filterModeFunctions = {
     'lower_case': function (value) {
         return value.toLowerCase()
     },
@@ -19,7 +19,7 @@ const filterModeFunctions = {
     },
 };
 
-const filter = function (mode, value) {
+var filter = function (mode, value) {
     if (!_.isString(value)) {
         throw Error('Expected string, given ' + _.toString(value));
     }

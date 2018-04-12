@@ -1,8 +1,8 @@
 'use strict';
 
-const _ = require('lodash');
+var _ = require('lodash');
 
-const compare = function (operator, expected, real) {
+var compare = function (operator, expected, real) {
     switch (operator) {
         case module.exports.EQUAL:
             return real === expected;

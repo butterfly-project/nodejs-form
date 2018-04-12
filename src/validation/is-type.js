@@ -1,10 +1,10 @@
 'use strict';
 
-const toType = function (obj) {
+var toType = function (obj) {
     return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
 };
 
-const check = function (expected, value) {
+var check = function (expected, value) {
     return expected === toType(value);
 };
 

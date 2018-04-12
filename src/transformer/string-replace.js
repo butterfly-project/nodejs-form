@@ -1,6 +1,6 @@
 'use strict';
 
-const filter = function (pattern, replacement, value) {
+var filter = function (pattern, replacement, value) {
     return value.replace(pattern, replacement);
 };
 

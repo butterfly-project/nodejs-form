@@ -1,6 +1,6 @@
 'use strict';
 
-const filter = function (map, defaultValue, value) {
+var filter = function (map, defaultValue, value) {
     return (value in map) ? map[value] : defaultValue;
 };
 
