@@ -3,93 +3,116 @@
 const _ = require('lodash');
 const scalarConstraint = require('./scalar-constraint');
 
-const filterTransformer = transformer => ({constraint, valueObj}) => {
-    return new Promise(resolve => {
-        transformer(_.cloneDeep(valueObj.value)).then(transformedValue => {
-            valueObj.value = transformedValue;
+const filterTransformer = function (transformer) {
+    return function ({constraint, valueObj}) {
+        return new Promise(function (resolve) {
+            transformer(_.cloneDeep(valueObj.value)).then(function (transformedValue) {
+                valueObj.value = transformedValue;
+                resolve({constraint, valueObj});
+            });
+        });
+    }
+};
+
+const filterValidator = function (validator, message, isFatal) {
+    return function ({constraint, valueObj}) {
+        return new Promise(function (resolve, reject) {
+            validator(valueObj.value).then(function (isCorrect) {
+                if (isCorrect) {
+                    resolve({constraint, valueObj});
+                } else if (!isFatal) {
+                    valueObj.errorMessages.push(message);
+                    resolve({constraint, valueObj})
+                } else {
+                    valueObj.errorMessages.push(message);
+                    reject({constraint, valueObj});
+                }
+            });
+        });
+    }
+};
+
+const filterBreakIf = function (validator, source) {
+    return function ({constraint, valueObj}) {
+        return new Promise(function (resolve, reject) {
+            const checkedValue = source === module.exports.SOURCE_CONSTRAINT ? constraint : valueObj.value;
+
+            validator(checkedValue).then(function (isBreak) {
+                if (isBreak) {
+                    reject({constraint, valueObj});
+                } else {
+                    resolve({constraint, valueObj});
+                }
+            });
+        });
+    }
+};
+
+const filterSaveValue = function (label) {
+    return function ({constraint, valueObj}) {
+        return new Promise(function (resolve) {
+            valueObj.values[label] = _.cloneDeep(valueObj.value);
+
             resolve({constraint, valueObj});
         });
-    });
+    }
 };
 
-const filterValidator = (validator, message, isFatal) => ({constraint, valueObj}) => {
-    return new Promise((resolve, reject) => {
-        validator(valueObj.value).then(isCorrect => {
-            if (isCorrect) {
-                resolve({constraint, valueObj});
-            } else if (!isFatal) {
-                valueObj.errorMessages.push(message);
-                resolve({constraint, valueObj})
-            } else {
-                valueObj.errorMessages.push(message);
-                reject({constraint, valueObj});
-            }
+const filterRestoreValue = function (label) {
+    return function ({constraint, valueObj}) {
+        return new Promise(function (resolve) {
+            valueObj.value = _.cloneDeep(valueObj.values[label]);
+
+            resolve({constraint, valueObj});
         });
-    });
-};
-
-const filterBreakIf = (validator, source) => ({constraint, valueObj}) => {
-    return new Promise((resolve, reject) => {
-        const checkedValue = source === module.exports.SOURCE_CONSTRAINT ? constraint : valueObj.value;
-
-        validator(checkedValue).then(isBreak => {
-            if (isBreak) {
-                reject({constraint, valueObj});
-            } else {
-                resolve({constraint, valueObj});
-            }
-        });
-    });
-};
-
-const filterSaveValue = label => ({constraint, valueObj}) => {
-    return new Promise(resolve => {
-        valueObj.values[label] = _.cloneDeep(valueObj.value);
-
-        resolve({constraint, valueObj});
-    });
-};
-
-const filterRestoreValue = label => ({constraint, valueObj}) => {
-    return new Promise(resolve => {
-        valueObj.value = _.cloneDeep(valueObj.values[label]);
-
-        resolve({constraint, valueObj});
-    });
+    }
 };
 
 class FilterResult {
     constructor(keyResults) {
         this.keys = _.keys(keyResults);
+        const self = this;
 
-        _.map(this.keys, key => {
-            this[key] = keyResults[key];
+        _.map(this.keys, function (key) {
+            self[key] = keyResults[key];
         });
     }
 
     getValue(label = 'after') {
         const result = {};
+        const self = this;
 
-        _.map(this.keys, key => {
-            result[key] = this[key].values[label];
+        _.map(this.keys, function (key) {
+            result[key] = self[key].values[label];
         });
 
         return result;
     }
 
     get isValid() {
-        return _.reduce(_.map(this.keys, key => this[key].isValid), (sum, isValid) => sum && isValid, true);
+        const self = this;
+        return _.reduce(_.map(this.keys, function (key) {
+            return self[key].isValid;
+        }), function (sum, isValid) {
+            return sum && isValid;
+        }, true);
     }
 
     get errorMessages() {
-        return _.reduce(_.map(this.keys, key => this[key].errorMessages), (sum, messages) => _.concat(sum, messages), []);
+        const self = this;
+        return _.reduce(_.map(this.keys, function (key) {
+            return self[key].errorMessages;
+        }), function (sum, messages) {
+            return _.concat(sum, messages);
+        }, []);
     }
 
     get structuredErrorMessages() {
+        const self = this;
         const result = {};
 
-        _.map(this.keys, key => {
-            result[key] = this[key].structuredErrorMessages;
+        _.map(this.keys, function (key) {
+            result[key] = self[key].structuredErrorMessages;
         });
 
         return result;
@@ -97,10 +120,11 @@ class FilterResult {
 
     get firstErrorMessage() {
         let errorMessage = '';
+        const self = this;
 
-        _.forEach(this.keys, key => {
-            if (this[key].errorMessages.length > 0) {
-                errorMessage = this[key].errorMessages[0];
+        _.forEach(this.keys, function (key) {
+            if (self[key].errorMessages.length > 0) {
+                errorMessage = self[key].errorMessages[0];
                 return false;
             }
         });
@@ -158,32 +182,35 @@ class ArrayConstraint {
     }
 
     filter(value) {
+        const self = this;
         if (!_.isObject(value)) {
-            const toType = obj => ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
+            const toType = function (obj) {
+                return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
+            };
             throw Error('Expected object, given ' + toType(value));
         }
 
-        return new Promise(resolve => {
-            const keys = _.keys(this.constraints);
+        return new Promise(function(resolve) {
+            const keys = _.keys(self.constraints);
 
             if (keys.length > 0) {
                 let currentKey = keys.shift();
-                let promise = this.constraints[currentKey].filter(value[currentKey]);
-                _.map(keys, key => {
-                    promise = promise.then(constraintResult => {
-                        this.tempResult[currentKey] = constraintResult;
+                let promise = self.constraints[currentKey].filter(value[currentKey]);
+                _.map(keys, function(key) {
+                    promise = promise.then(function(constraintResult) {
+                        self.tempResult[currentKey] = constraintResult;
 
                         currentKey = key;
 
-                        return this.constraints[currentKey].filter(value[currentKey]);
+                        return self.constraints[currentKey].filter(value[currentKey]);
                     });
                 });
 
-                promise.then(constraintResult => {
-                    this.tempResult[currentKey] = constraintResult;
+                promise.then(function(constraintResult) {
+                    self.tempResult[currentKey] = constraintResult;
 
-                    resolve(new FilterResult(_.cloneDeep(this.tempResult)));
-                    this.tempResult = {};
+                    resolve(new FilterResult(_.cloneDeep(self.tempResult)));
+                    self.tempResult = {};
                 });
             }
         });
@@ -191,6 +218,6 @@ class ArrayConstraint {
 }
 
 
-module.exports = () => {
+module.exports = function() {
     return new ArrayConstraint();
 };

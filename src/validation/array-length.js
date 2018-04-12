@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const compare = (operator, expected, real) => {
+const compare = function (operator, expected, real) {
     switch (operator) {
         case module.exports.EQUAL:
             return real === expected;
@@ -21,14 +21,16 @@ const compare = (operator, expected, real) => {
     }
 };
 
-module.exports = (expected, operator) => value => {
-    return new Promise(resolve => {
-        if (!_.isArray(value)) {
-            throw Error('Expected array, given ' + _.toString(value));
-        }
+module.exports = function (expected, operator) {
+    return function (value) {
+        return new Promise(function (resolve) {
+            if (!_.isArray(value)) {
+                throw Error('Expected array, given ' + _.toString(value));
+            }
 
-        resolve(compare(operator, expected, value.length));
-    });
+            resolve(compare(operator, expected, value.length));
+        });
+    }
 };
 
 module.exports.EQUAL = '=';

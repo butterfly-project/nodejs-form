@@ -1,9 +1,13 @@
 'use strict';
 
-const check = value => {
+const check = function (value) {
     return value !== undefined;
 };
 
-module.exports = () => value => {
-    return new Promise(resolve => resolve(check(value)));
+module.exports = function () {
+    return function (value) {
+        return new Promise(function (resolve) {
+            resolve(check(value))
+        });
+    }
 };

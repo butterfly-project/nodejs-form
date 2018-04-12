@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const check = value => {
+const check = function (value) {
     if (!_.isBoolean(value)) {
         throw Error('Expected boolean, given ' + _.toString(value));
     }
@@ -10,6 +10,10 @@ const check = value => {
     return value === false;
 };
 
-module.exports = () => value => {
-    return new Promise(resolve => resolve(check(value)));
+module.exports = function () {
+    return function (value) {
+        return new Promise(function (resolve) {
+            resolve(check(value))
+        });
+    }
 };
