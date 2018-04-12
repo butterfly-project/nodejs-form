@@ -3,220 +3,151 @@
 var _ = require('lodash');
 var scalarConstraint = require('./scalar-constraint');
 
-var filterTransformer = function (transformer) {
-    return function ({constraint, valueObj}) {
-        return new Promise(function (resolve) {
-            transformer(_.cloneDeep(valueObj.value)).then(function (transformedValue) {
-                valueObj.value = transformedValue;
-                resolve({constraint, valueObj});
-            });
-        });
-    }
-};
+function FilterResult(keyResults) {
+    this.keys = _.keys(keyResults);
+    var self = this;
 
-var filterValidator = function (validator, message, isFatal) {
-    return function ({constraint, valueObj}) {
-        return new Promise(function (resolve, reject) {
-            validator(valueObj.value).then(function (isCorrect) {
-                if (isCorrect) {
-                    resolve({constraint, valueObj});
-                } else if (!isFatal) {
-                    valueObj.errorMessages.push(message);
-                    resolve({constraint, valueObj})
-                } else {
-                    valueObj.errorMessages.push(message);
-                    reject({constraint, valueObj});
-                }
-            });
-        });
-    }
-};
-
-var filterBreakIf = function (validator, source) {
-    return function ({constraint, valueObj}) {
-        return new Promise(function (resolve, reject) {
-            var checkedValue = source === module.exports.SOURCE_CONSTRAINT ? constraint : valueObj.value;
-
-            validator(checkedValue).then(function (isBreak) {
-                if (isBreak) {
-                    reject({constraint, valueObj});
-                } else {
-                    resolve({constraint, valueObj});
-                }
-            });
-        });
-    }
-};
-
-var filterSaveValue = function (label) {
-    return function ({constraint, valueObj}) {
-        return new Promise(function (resolve) {
-            valueObj.values[label] = _.cloneDeep(valueObj.value);
-
-            resolve({constraint, valueObj});
-        });
-    }
-};
-
-var filterRestoreValue = function (label) {
-    return function ({constraint, valueObj}) {
-        return new Promise(function (resolve) {
-            valueObj.value = _.cloneDeep(valueObj.values[label]);
-
-            resolve({constraint, valueObj});
-        });
-    }
-};
-
-class FilterResult {
-    constructor(keyResults) {
-        this.keys = _.keys(keyResults);
-        var self = this;
-
-        _.map(this.keys, function (key) {
-            self[key] = keyResults[key];
-        });
-    }
-
-    getValue(label = 'after') {
-        var result = {};
-        var self = this;
-
-        _.map(this.keys, function (key) {
-            result[key] = self[key].values[label];
-        });
-
-        return result;
-    }
-
-    get isValid() {
-        var self = this;
-        return _.reduce(_.map(this.keys, function (key) {
-            return self[key].isValid;
-        }), function (sum, isValid) {
-            return sum && isValid;
-        }, true);
-    }
-
-    get errorMessages() {
-        var self = this;
-        return _.reduce(_.map(this.keys, function (key) {
-            return self[key].errorMessages;
-        }), function (sum, messages) {
-            return _.concat(sum, messages);
-        }, []);
-    }
-
-    get structuredErrorMessages() {
-        var self = this;
-        var result = {};
-
-        _.map(this.keys, function (key) {
-            result[key] = self[key].structuredErrorMessages;
-        });
-
-        return result;
-    }
-
-    get firstErrorMessage() {
-        var errorMessage = '';
-        var self = this;
-
-        _.forEach(this.keys, function (key) {
-            if (self[key].errorMessages.length > 0) {
-                errorMessage = self[key].errorMessages[0];
-                return false;
-            }
-        });
-
-        return errorMessage;
-    }
-
+    _.map(this.keys, function (key) {
+        self[key] = keyResults[key];
+    });
 }
 
-class ArrayConstraint {
-    constructor() {
-        this.constraints = {};
-        this.parent = null;
-        this.tempResult = {};
-    }
+FilterResult.prototype.getValue = function(label) {
+    label = label || 'after';
 
-    setParent(parent) {
-        this.parent = parent;
+    var result = {};
+    var self = this;
 
-        return this;
-    }
+    _.map(this.keys, function (key) {
+        result[key] = self[key].getValue(label);
+    });
 
-    getParent() {
-        return this.parent;
-    }
+    return result;
+};
+FilterResult.prototype.getValue = function(label) {
+    label = label || 'after';
 
-    end() {
-        return this.parent;
-    }
+    var result = {};
+    var self = this;
 
-    addScalarConstraint(key) {
-        return this.addConstraint(key, scalarConstraint());
-    }
+    _.map(this.keys, function (key) {
+        result[key] = self[key].getValue(label);
+    });
 
-    addArrayConstraint(key) {
-        return this.addConstraint(key, new ArrayConstraint());
-    }
+    return result;
+};
+FilterResult.prototype.isValid = function() {
+    var self = this;
+    return _.reduce(_.map(this.keys, function (key) {
+        return self[key].isValid();
+    }), function (sum, isValid) {
+        return sum && isValid;
+    }, true);
+};
+FilterResult.prototype.errorMessages = function() {
+    var self = this;
+    return _.reduce(_.map(this.keys, function (key) {
+        return self[key].errorMessages();
+    }), function (sum, messages) {
+        return _.concat(sum, messages);
+    }, []);
+};
+FilterResult.prototype.structuredErrorMessages = function() {
+    var self = this;
+    var result = {};
 
-    addConstraint(key, constraint) {
-        this.constraints[key] = constraint;
-        constraint.setParent(this);
+    _.map(this.keys, function (key) {
+        result[key] = self[key].structuredErrorMessages();
+    });
 
-        return constraint;
-    }
+    return result;
+};
+FilterResult.prototype.firstErrorMessage = function() {
+    var errorMessage = '';
+    var self = this;
 
-    removeConstraint(key) {
-        if (undefined !== this.constraints[key]) {
-            this.constraints[key].setParent(null);
-            delete this.constraints[key];
+    _.forEach(this.keys, function (key) {
+        if (self[key].errorMessages().length > 0) {
+            errorMessage = self[key].errorMessages()[0];
+            return false;
         }
+    });
+
+    return errorMessage;
+};
+
+function ArrayConstraint() {
+    this.constraints = {};
+    this.parent = null;
+    this.tempResult = {};
+}
+
+ArrayConstraint.prototype.setParent = function (parent) {
+    this.parent = parent;
+
+    return this;
+};
+ArrayConstraint.prototype.getParent = function() {
+    return this.parent;
+};
+ArrayConstraint.prototype.end = function() {
+    return this.parent;
+};
+ArrayConstraint.prototype.addScalarConstraint = function(key) {
+    return this.addConstraint(key, scalarConstraint());
+};
+ArrayConstraint.prototype.addArrayConstraint = function(key) {
+    return this.addConstraint(key, new ArrayConstraint());
+};
+ArrayConstraint.prototype.addConstraint = function(key, constraint) {
+    this.constraints[key] = constraint;
+    constraint.setParent(this);
+
+    return constraint;
+};
+ArrayConstraint.prototype.removeConstraint = function(key) {
+    if (undefined !== this.constraints[key]) {
+        this.constraints[key].setParent(null);
+        delete this.constraints[key];
+    }
+};
+ArrayConstraint.prototype.get = function(key) {
+    return this.constraints[key] || null;
+};
+ArrayConstraint.prototype.filter = function(value) {
+    var self = this;
+    if (!_.isObject(value)) {
+        var toType = function (obj) {
+            return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
+        };
+        throw Error('Expected object, given ' + toType(value));
     }
 
-    get(key) {
-        return this.constraints[key] || null;
-    }
+    return new Promise(function(resolve) {
+        var keys = _.keys(self.constraints);
 
-    filter(value) {
-        var self = this;
-        if (!_.isObject(value)) {
-            var toType = function (obj) {
-                return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
-            };
-            throw Error('Expected object, given ' + toType(value));
-        }
-
-        return new Promise(function(resolve) {
-            var keys = _.keys(self.constraints);
-
-            if (keys.length > 0) {
-                var currentKey = keys.shift();
-                var promise = self.constraints[currentKey].filter(value[currentKey]);
-                _.map(keys, function(key) {
-                    promise = promise.then(function(constraintResult) {
-                        self.tempResult[currentKey] = constraintResult;
-
-                        currentKey = key;
-
-                        return self.constraints[currentKey].filter(value[currentKey]);
-                    });
-                });
-
-                promise.then(function(constraintResult) {
+        if (keys.length > 0) {
+            var currentKey = keys.shift();
+            var promise = self.constraints[currentKey].filter(value[currentKey]);
+            _.map(keys, function(key) {
+                promise = promise.then(function(constraintResult) {
                     self.tempResult[currentKey] = constraintResult;
 
-                    resolve(new FilterResult(_.cloneDeep(self.tempResult)));
-                    self.tempResult = {};
-                });
-            }
-        });
-    }
-}
+                    currentKey = key;
 
+                    return self.constraints[currentKey].filter(value[currentKey]);
+                });
+            });
+
+            promise.then(function(constraintResult) {
+                self.tempResult[currentKey] = constraintResult;
+
+                resolve(new FilterResult(_.cloneDeep(self.tempResult)));
+                self.tempResult = {};
+            });
+        }
+    });
+};
 
 module.exports = function() {
     return new ArrayConstraint();

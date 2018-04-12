@@ -21,7 +21,7 @@ defineTest(({describe, it, assert}) => {
         it("standart", () => {
             return form.filter({username: ' a ', password: 'b'})
                 .then(result => {
-                    assert.equal(result.isValid, true);
+                    assert.equal(result.isValid(), true);
                     assert.deepEqual(result.getValue('before'), {username: ' a ', password: 'b'});
                     assert.deepEqual(result.getValue('after'), {username: 'a', password: 'b'});
                 });
@@ -30,13 +30,13 @@ defineTest(({describe, it, assert}) => {
         it("errorMessages", () => {
             return form.filter({username: ' ', password: ' '})
                 .then(result => {
-                    assert.equal(result.isValid, false);
-                    assert.equal(result.errorMessages.length, 2);
-                    assert.equal(result.username.isValid, false);
-                    assert.equal(result.username.errorMessages.length, 1);
-                    assert.equal(result.structuredErrorMessages.username.length, 1);
-                    assert.equal(result.structuredErrorMessages.password.length, 1);
-                    assert.equal(result.firstErrorMessage !== null, true);
+                    assert.equal(result.isValid(), false);
+                    assert.equal(result.errorMessages().length, 2);
+                    assert.equal(result.username.isValid(), false);
+                    assert.equal(result.username.errorMessages().length, 1);
+                    assert.equal(result.structuredErrorMessages().username.length, 1);
+                    assert.equal(result.structuredErrorMessages().password.length, 1);
+                    assert.equal(result.firstErrorMessage() !== null, true);
                 });
         });
 
@@ -57,12 +57,12 @@ defineTest(({describe, it, assert}) => {
             return new Promise(resolve => {
                 const userResult = passwordConstraint.getParent().tempResult.user;
 
-                if (!userResult.isValid) {
+                if (!userResult.isValid()) {
                     resolve(false);
                     return;
                 }
 
-                const user = userResult.value;
+                const user = userResult.getValue();
                 const isCorrect = user.password === password;
 
                 resolve(isCorrect);
@@ -84,21 +84,21 @@ defineTest(({describe, it, assert}) => {
         it("realform", () => {
             return realForm.filter({user: 'user', password: 'abc'})
                 .then(result => {
-                    assert.equal(result.isValid, true);
+                    assert.equal(result.isValid(), true);
                 });
         });
 
         it("realform undefined user", () => {
             return realForm.filter({user: 'u', password: 'abc'})
                 .then(result => {
-                    assert.equal(result.firstErrorMessage, 'Undefined user');
+                    assert.equal(result.firstErrorMessage(), 'Undefined user');
                 });
         });
 
         it("realform incorrect password", () => {
             return realForm.filter({user: 'user', password: 'abc1'})
                 .then(result => {
-                    assert.equal(result.firstErrorMessage, 'Incorrect password');
+                    assert.equal(result.firstErrorMessage(), 'Incorrect password');
                 });
         });
     });
