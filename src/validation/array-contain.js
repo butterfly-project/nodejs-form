@@ -1,7 +1,9 @@
 'use strict';
 
-module.exports = expected => value => {
-    return new Promise(resolve => {
-        resolve(-1 !== expected.indexOf(value));
-    });
+module.exports = function (expected) {
+    return function (value) {
+        return new Promise(function (resolve) {
+            resolve(-1 !== expected.indexOf(value));
+        });
+    }
 };

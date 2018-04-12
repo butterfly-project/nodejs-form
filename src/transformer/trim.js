@@ -1,9 +1,13 @@
 'use strict';
 
-const filter = value => {
+const filter = function (value) {
     return value.trim();
 };
 
-module.exports = () => value => {
-    return new Promise(resolve => resolve(filter(value)));
+module.exports = function () {
+    return function (value) {
+        return new Promise(function (resolve) {
+            resolve(filter(value))
+        });
+    }
 };

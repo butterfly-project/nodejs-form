@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const compare = (operator, expected, value) => {
+const compare = function (operator, expected, value) {
     switch (operator) {
         case module.exports.EQUAL:
             return value == expected;
@@ -26,10 +26,12 @@ const compare = (operator, expected, value) => {
     }
 };
 
-module.exports = (expected, operator = module.exports.IDENTICALLY) => value => {
-    return new Promise(resolve => {
-        resolve(compare(operator, expected, value));
-    });
+module.exports = function (expected, operator = module.exports.IDENTICALLY) {
+    return function (value) {
+        return new Promise(function (resolve) {
+            resolve(compare(operator, expected, value));
+        });
+    }
 };
 
 module.exports.EQUAL = '==';

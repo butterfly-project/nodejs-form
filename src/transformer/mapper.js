@@ -1,9 +1,13 @@
 'use strict';
 
-const filter = (map, defaultValue, value) => {
+const filter = function (map, defaultValue, value) {
     return (value in map) ? map[value] : defaultValue;
 };
 
-module.exports = (map, defaultValue) => value => {
-    return new Promise(resolve => resolve(filter(map, defaultValue, value)));
+module.exports = function (map, defaultValue) {
+    return function (value) {
+        return new Promise(function (resolve) {
+            resolve(filter(map, defaultValue, value));
+        });
+    }
 };

@@ -1,9 +1,13 @@
 'use strict';
 
-const check = (regexp, value) => {
+const check = function (regexp, value) {
     return regexp.test(String(value).toLowerCase());
 };
 
-module.exports = regexp => value => {
-    return new Promise(resolve => resolve(check(regexp, value)));
+module.exports = function (regexp) {
+    return function (value) {
+        return new Promise(function (resolve) {
+            resolve(check(regexp, value))
+        });
+    }
 };
