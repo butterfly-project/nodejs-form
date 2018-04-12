@@ -1,8 +1,8 @@
 'use strict';
 
-const _ = require('lodash');
+var _ = require('lodash');
 
-const filterTransformer = function (transformer) {
+var filterTransformer = function (transformer) {
     return function ({constraint, valueObj}) {
         return new Promise(function (resolve) {
             transformer(_.cloneDeep(valueObj.value), constraint).then(function (transformedValue) {
@@ -13,7 +13,7 @@ const filterTransformer = function (transformer) {
     }
 };
 
-const filterValidator = function (validator, message, isFatal) {
+var filterValidator = function (validator, message, isFatal) {
     return function ({constraint, valueObj}) {
         return new Promise(function (resolve, reject) {
             validator(valueObj.value, constraint).then(function (isCorrect) {
@@ -31,10 +31,10 @@ const filterValidator = function (validator, message, isFatal) {
     }
 };
 
-const filterBreakIf = function (validator, source) {
+var filterBreakIf = function (validator, source) {
     return function ({constraint, valueObj}) {
         return new Promise(function (resolve, reject) {
-            const checkedValue = source === module.exports.SOURCE_CONSTRAINT ? constraint : valueObj.value;
+            var checkedValue = source === module.exports.SOURCE_CONSTRAINT ? constraint : valueObj.value;
 
             validator(checkedValue).then(function (isBreak) {
                 if (isBreak) {
@@ -47,10 +47,10 @@ const filterBreakIf = function (validator, source) {
     }
 };
 
-const filterValueIf = function (validator, value, source) {
+var filterValueIf = function (validator, value, source) {
     return function ({constraint, valueObj}) {
         return new Promise(function (resolve) {
-            const checkedValue = source === module.exports.SOURCE_CONSTRAINT ? constraint : valueObj.value;
+            var checkedValue = source === module.exports.SOURCE_CONSTRAINT ? constraint : valueObj.value;
 
             validator(checkedValue).then(function (isSuccess) {
                 if (isSuccess) {
@@ -63,7 +63,7 @@ const filterValueIf = function (validator, value, source) {
     }
 };
 
-const filterSaveValue = function (label) {
+var filterSaveValue = function (label) {
     return function ({constraint, valueObj}) {
         return new Promise(function (resolve) {
             valueObj.values[label] = _.cloneDeep(valueObj.value);
@@ -73,7 +73,7 @@ const filterSaveValue = function (label) {
     }
 };
 
-const filterRestoreValue = function (label) {
+var filterRestoreValue = function (label) {
     return function ({constraint, valueObj}) {
         return new Promise(function (resolve) {
             valueObj.value = _.cloneDeep(valueObj.values[label]);
@@ -144,8 +144,8 @@ class ScalarConstraint {
     }
 
     filter(value) {
-        const self = this;
-        const valueObj = {
+        var self = this;
+        var valueObj = {
             value,
             values: {
                 'before': _.cloneDeep(value),
@@ -154,8 +154,8 @@ class ScalarConstraint {
         };
 
         return new Promise(function (resolve) {
-            const createResponse = function (valueObj) {
-                const isValid = valueObj.errorMessages.length === 0;
+            var createResponse = function (valueObj) {
+                var isValid = valueObj.errorMessages.length === 0;
                 valueObj.values['after'] = valueObj.value;
                 return {
                     isValid,
@@ -167,10 +167,10 @@ class ScalarConstraint {
                 };
             };
 
-            const filters = _.cloneDeep(self.filters);
+            var filters = _.cloneDeep(self.filters);
 
             if (filters.length > 0) {
-                const promise = _.reduce(filters, function (promise, filter) {
+                var promise = _.reduce(filters, function (promise, filter) {
                     return promise.then(filter)
                 }, filters.shift()({
                     constraint: self,
