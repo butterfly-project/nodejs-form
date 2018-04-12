@@ -18,15 +18,15 @@ defineTest(({describe, it, assert}) => {
             ;
 
             return form.filter(' a ')
-                .then(({isValid, value, values, errorMessages, structuredErrorMessages, firstErrorMessage}) => {
-                    assert.equal(isValid, true);
-                    assert.equal(value, ' a ');
-                    assert.equal(values.before, ' a ');
-                    assert.equal(values.trim, 'a');
-                    assert.equal(values.after, ' a ');
-                    assert.equal(errorMessages.length, 0);
-                    assert.equal(structuredErrorMessages.length, 0);
-                    assert.equal(firstErrorMessage, null);
+                .then(({isValid, getValue, errorMessages, structuredErrorMessages, firstErrorMessage}) => {
+                    assert.equal(isValid(), true);
+                    assert.equal(getValue(), ' a ');
+                    assert.equal(getValue('before'), ' a ');
+                    assert.equal(getValue('trim'), 'a');
+                    assert.equal(getValue('after'), ' a ');
+                    assert.equal(errorMessages().length, 0);
+                    assert.equal(structuredErrorMessages().length, 0);
+                    assert.equal(firstErrorMessage(), null);
                 });
         });
         it("validator fatal", () => {
@@ -39,15 +39,15 @@ defineTest(({describe, it, assert}) => {
             ;
 
             return form.filter(' ')
-                .then(({isValid, value, values, errorMessages, structuredErrorMessages, firstErrorMessage}) => {
-                    assert.equal(isValid, false);
-                    assert.equal(value, '');
-                    assert.equal(values.before, ' ');
-                    assert.equal(values.trim, '');
-                    assert.equal(values.after, '');
-                    assert.equal(errorMessages.length, 1);
-                    assert.equal(structuredErrorMessages.length, 1);
-                    assert.equal(firstErrorMessage, 'Value is empty');
+                .then(({isValid, getValue, errorMessages, structuredErrorMessages, firstErrorMessage}) => {
+                    assert.equal(isValid(), false);
+                    assert.equal(getValue(), '');
+                    assert.equal(getValue('before'), ' ');
+                    assert.equal(getValue('trim'), '');
+                    assert.equal(getValue('after'), '');
+                    assert.equal(errorMessages().length, 1);
+                    assert.equal(structuredErrorMessages().length, 1);
+                    assert.equal(firstErrorMessage(), 'Value is empty');
                 });
         });
         it("validator", () => {
@@ -57,11 +57,11 @@ defineTest(({describe, it, assert}) => {
             ;
 
             return form.filter('')
-                .then(({isValid, value, errorMessages, firstErrorMessage}) => {
-                    assert.equal(isValid, false);
-                    assert.equal(value, '');
-                    assert.equal(errorMessages.length, 2);
-                    assert.equal(firstErrorMessage, 'Value is empty');
+                .then(({isValid, getValue, errorMessages, firstErrorMessage}) => {
+                    assert.equal(isValid(), false);
+                    assert.equal(getValue(), '');
+                    assert.equal(errorMessages().length, 2);
+                    assert.equal(firstErrorMessage(), 'Value is empty');
                 });
         });
         it("breakIf", () => {
@@ -71,11 +71,11 @@ defineTest(({describe, it, assert}) => {
             ;
 
             return form.filter('')
-                .then(({isValid, value, errorMessages, firstErrorMessage}) => {
-                    assert.equal(isValid, true);
-                    assert.equal(value, '');
-                    assert.equal(errorMessages.length, 0);
-                    assert.equal(firstErrorMessage, null);
+                .then(({isValid, getValue, errorMessages, firstErrorMessage}) => {
+                    assert.equal(isValid(), true);
+                    assert.equal(getValue(), '');
+                    assert.equal(errorMessages().length, 0);
+                    assert.equal(firstErrorMessage(), null);
                 });
         });
         it("valueIf", () => {
@@ -85,11 +85,11 @@ defineTest(({describe, it, assert}) => {
             ;
 
             return form.filter(0)
-                .then(({isValid, value, errorMessages, firstErrorMessage}) => {
-                    assert.equal(isValid, true);
-                    assert.equal(value, 100);
-                    assert.equal(errorMessages.length, 0);
-                    assert.equal(firstErrorMessage, null);
+                .then(({isValid, getValue, errorMessages, firstErrorMessage}) => {
+                    assert.equal(isValid(), true);
+                    assert.equal(getValue(), 100);
+                    assert.equal(errorMessages().length, 0);
+                    assert.equal(firstErrorMessage(), null);
                 });
         });
     });
