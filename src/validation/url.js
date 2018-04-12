@@ -11,7 +11,9 @@ const check = function (simple, value) {
     return re.test(String(value).toLowerCase());
 };
 
-module.exports = function (simple = false) {
+module.exports = function (simple) {
+    simple = simple || false;
+
     return function (value) {
         return new Promise(function (resolve) {
             resolve(check(simple, value))

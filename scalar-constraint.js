@@ -103,7 +103,9 @@ class ScalarConstraint {
         return this.parent;
     }
 
-    addValidator(validator, message = '', isFatal = false) {
+    addValidator(validator, message, isFatal) {
+        message = message || '';
+        isFatal = isFatal || false;
         this.filters.push(filterValidator(validator, message, isFatal));
 
         return this;
@@ -115,13 +117,15 @@ class ScalarConstraint {
         return this;
     }
 
-    breakIf(validator, source = module.exports.SOURCE_VALUE) {
+    breakIf(validator, source) {
+        source = source || module.exports.SOURCE_VALUE;
         this.filters.push(filterBreakIf(validator, source));
 
         return this;
     }
 
-    valueIf(validator, value, source = module.exports.SOURCE_VALUE) {
+    valueIf(validator, value, source) {
+        source = source || module.exports.SOURCE_VALUE;
         this.filters.push(filterValueIf(validator, value, source));
 
         return this;

@@ -21,7 +21,9 @@ const compare = function (operator, expected, real) {
     }
 };
 
-module.exports = function (expected, operator = module.exports.EQUAL) {
+module.exports = function (expected, operator) {
+    operator = operator || module.exports.EQUAL;
+
     return function (value) {
         return new Promise(function(resolve) {
             if (!_.isString(value)) {
