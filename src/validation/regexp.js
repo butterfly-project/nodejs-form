@@ -1,6 +1,6 @@
 'use strict';
 
-const check = function (regexp, value) {
+var check = function (regexp, value) {
     return regexp.test(String(value).toLowerCase());
 };
 

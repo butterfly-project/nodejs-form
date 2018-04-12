@@ -1,6 +1,6 @@
 'use strict';
 
-const check = function (value) {
+var check = function (value) {
     return value === undefined;
 };
 

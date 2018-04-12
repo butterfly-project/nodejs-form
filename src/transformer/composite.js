@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
+var _ = require('lodash');
 
 module.exports = function (transformers) {
     return function (value) {
@@ -10,8 +10,8 @@ module.exports = function (transformers) {
                 return;
             }
 
-            const workTransformers = _.cloneDeep(transformers);
-            let promise = workTransformers.shift()(value);
+            var workTransformers = _.cloneDeep(transformers);
+            var promise = workTransformers.shift()(value);
             _.map(workTransformers, function (transformer) {
                 promise = promise.then(transformer);
             });

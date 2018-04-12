@@ -1,8 +1,8 @@
 'use strict';
 
-const _ = require('lodash');
+var _ = require('lodash');
 
-const check = function (value) {
+var check = function (value) {
     if (!_.isBoolean(value)) {
         throw Error('Expected boolean, given ' + _.toString(value));
     }
