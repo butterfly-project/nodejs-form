@@ -12,6 +12,9 @@ var typeFilters = {
     'string': function (value) {
         return value.toString();
     },
+    'date': function (value) {
+        return new Date(value);
+    },
 };
 
 var filter = function (type, value) {
@@ -29,3 +32,4 @@ module.exports = function (type) {
 module.exports.TYPE_BOOLEAN = 'boolean';
 module.exports.TYPE_NUMBER = 'number';
 module.exports.TYPE_STRING = 'string';
+module.exports.TYPE_DATE = 'date';
