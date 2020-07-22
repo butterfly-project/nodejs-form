@@ -22,17 +22,29 @@ var filterValidator = function (validator, message, isFatal) {
         var valueObj = params.valueObj;
 
         return new Promise(function (resolve, reject) {
-            validator(valueObj.value, constraint).then(function (isCorrect) {
-                if (isCorrect) {
-                    resolve(params);
-                } else if (!isFatal) {
-                    valueObj.errorMessages.push(message);
-                    resolve(params)
-                } else {
+            validator(valueObj.value, constraint)
+                .then(function (isCorrect) {
+                    if (isCorrect) {
+                        resolve(params);
+                    } else if (!isFatal) {
+                        valueObj.errorMessages.push(message);
+                        resolve(params)
+                    } else {
+                        valueObj.errorMessages.push(message);
+                        reject(params);
+                    }
+                })
+                .catch(function (error) {
+                    var message = error.message || error;
+                    var parameters = error.data || {};
+
+                    _.map(_.keys(parameters), parameter => {
+                        message = message.replace('%' + parameter + '%', parameters[parameter]);
+                    })
+
                     valueObj.errorMessages.push(message);
                     reject(params);
-                }
-            });
+                })
         });
     }
 };
